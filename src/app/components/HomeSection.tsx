@@ -164,7 +164,7 @@ export default function Hero() {
               </div>
 
               {/* Title with underline decoration */}
-              <h1 className="text-7xl font-bold tracking-tight relative">
+              {/*<h1 className="text-7xl font-bold tracking-tight relative">
                 <span className="text-white">Welcome to</span>
                 <span className="block mt-2 bg-gradient-to-r from-blue-200 to-blue-400 bg-clip-text text-transparent relative">
                   Tete Junior school
@@ -179,7 +179,7 @@ export default function Hero() {
                     />
                   </svg>
                 </span>
-              </h1>
+              </h1>*/}
 
               <span className="text-blue-100/90 text-sm font-medium mb-2 block">
                 Shaping tomorrow&apos;s leaders through innovative,
