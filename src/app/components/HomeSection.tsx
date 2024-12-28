@@ -8,17 +8,20 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/effect-fade";
 import SchoolWelcomeNotification from "./SchoolWelcomeNotification";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 
 const BACKGROUND_IMAGES = [
   "/home/1.jpg",
   "/home/2.jpg",
   "/home/3.jpg",
   "/home/4.jpg",
-  "/home/9.png",
-  "/home/10.jpg",
+  "/home/5.png",
+  "/home/6.jpg",
+  "/home/7.jpg",
+  "/home/8.jpg",
+  "/home/9.jpg",
 ];
 
-// Posições fixas para evitar erro de hidratação
 const STAR_POSITIONS = [
   { top: 15, left: 20, delay: 0.2 },
   { top: 25, left: 60, delay: 0.5 },
@@ -113,17 +116,48 @@ const DecorativeDoodles = () => (
   </>
 );
 
+// Add translations
+const translations = {
+  en: {
+    subtitle: "Transformative Education",
+    description:
+      "Shaping tomorrow's leaders through innovative, technological, and humanized education to meet the challenges of the 21st century. Our mission is to inspire and empower the next generation.",
+    learnMore: "Learn More",
+    upcomingEvents: "Upcoming Events",
+    events: "Events",
+    stats: [
+      { number: "15+", label: "Years of Excellence" },
+      { number: "1000+", label: "Graduates" },
+      { number: "98%", label: "Success Rate" },
+    ],
+  },
+  pt: {
+    subtitle: "Educação Transformadora",
+    description:
+      "Formando os líderes do amanhã através de uma educação inovadora, tecnológica e humanizada para enfrentar os desafios do século XXI. Nossa missão é inspirar e capacitar a próxima geração.",
+    learnMore: "Saiba Mais",
+    upcomingEvents: "Próximos Eventos",
+    events: "Eventos",
+    stats: [
+      { number: "15+", label: "Anos de Excelência" },
+      { number: "1000+", label: "Graduados" },
+      { number: "98%", label: "Taxa de Sucesso" },
+    ],
+  },
+};
+
 export default function Hero() {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   return (
     <>
-      {/* Navbar */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navbar />
       </div>
       <SchoolWelcomeNotification />
 
       <main className="relative min-h-screen overflow-hidden">
-        {/* Background Swiper */}
         <div className="fixed inset-0">
           <Swiper
             modules={[Autoplay, EffectFade]}
@@ -141,59 +175,34 @@ export default function Hero() {
                   className="h-screen w-full bg-cover bg-center"
                   style={{ backgroundImage: `url(${image})` }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-zinc-950/95 to-zinc-800/75" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-zinc-900" />
                 </div>
               </SwiperSlide>
             ))}
           </Swiper>
         </div>
 
-        {/* Decorative elements */}
         <DecorativeDoodles />
 
-        {/* Content */}
         <div className="relative flex items-center min-h-screen">
           <div className="container mx-auto px-6">
             <div className="max-w-3xl space-y-8">
-              {/* Subtitle with decoration */}
               <div className="relative">
                 <span className="bg-blue-500/20 text-blue-200 px-4 py-1.5 rounded-full text-sm font-medium tracking-wide inline-block relative z-10">
-                  Transformative Education
+                  {t.subtitle}
                 </span>
                 <div className="absolute -bottom-2 -right-4 w-20 h-8 border-b-2 border-r-2 border-blue-400/20 rounded-br-lg" />
               </div>
 
-              {/* Title with underline decoration */}
-              {/*<h1 className="text-7xl font-bold tracking-tight relative">
-                <span className="text-white">Welcome to</span>
-                <span className="block mt-2 bg-gradient-to-r from-blue-200 to-blue-400 bg-clip-text text-transparent relative">
-                  Tete Junior school
-                  <svg
-                    className="absolute -bottom-4 left-0 w-32 h-4 text-blue-400/40"
-                    viewBox="0 0 100 10"
-                  >
-                    <path
-                      d="M0 5C20 5, 20 9, 40 9C60 9, 60 5, 80 5C100 5, 100 9, 120 9"
-                      stroke="currentColor"
-                      fill="none"
-                    />
-                  </svg>
-                </span>
-              </h1>*/}
-
               <span className="text-blue-100/90 text-sm font-medium mb-2 block">
-                Shaping tomorrow&apos;s leaders through innovative,
-                technological, and humanized education to meet the challenges of
-                the 21st century. Our mission is to inspire and empower the next
-                generation.
+                {t.description}
               </span>
 
-              {/* Buttons */}
               <div className="flex flex-row gap-6 pt-4">
                 <Link href="/about" className="block group relative">
                   <div className="absolute inset-0 bg-blue-400/20 rounded-lg transform rotate-3 group-hover:rotate-6 transition-transform" />
                   <Button className="relative bg-white text-blue-900 hover:bg-blue-50 text-lg px-8 py-6 transition-all duration-300 flex items-center gap-2 whitespace-nowrap">
-                    Learn More
+                    {t.learnMore}
                     <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -205,22 +214,17 @@ export default function Hero() {
                     className="relative text-white border-white/30 hover:border-white hover:bg-white text-lg px-4 md:px-6 py-6 transition-all duration-300 flex items-center gap-2"
                   >
                     <Calendar className="w-5 h-5" />
-                    <span className="hidden md:inline">Upcoming Events</span>
-                    <span className="md:hidden">Events</span>
+                    <span className="hidden md:inline">{t.upcomingEvents}</span>
+                    <span className="md:hidden">{t.events}</span>
                   </Button>
                 </Link>
               </div>
 
-              {/* Stats */}
               <div className="grid grid-cols-3 gap-8 pt-12 mt-12 mb-10 border-t border-white/10 relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-blue-500/20 w-12 h-12 rounded-full flex items-center justify-center">
                   <div className="w-6 h-6 bg-blue-400/40 rounded-full animate-ping" />
                 </div>
-                {[
-                  { number: "15+", label: "Years of Excellence" },
-                  { number: "1000+", label: "Graduates" },
-                  { number: "98%", label: "Success Rate" },
-                ].map((stat, index) => (
+                {t.stats.map((stat, index) => (
                   <div key={index} className="text-center relative group">
                     <div className="absolute inset-0 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all duration-300" />
                     <div className="relative">

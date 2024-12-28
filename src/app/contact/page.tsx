@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/app/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Send,
@@ -15,62 +17,214 @@ import {
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
+// Define types for the form fields and errors
+type FormField = "name" | "email" | "phone" | "message";
+
+type FormData = {
+  [K in FormField]: string;
+};
+
+type ErrorMessages = {
+  name: {
+    required: string;
+    pattern: string;
+  };
+  email: {
+    required: string;
+    pattern: string;
+  };
+  phone: {
+    required: string;
+    pattern: string;
+  };
+  message: {
+    required: string;
+    minLength: string;
+    maxLength: string;
+  };
+  form: string;
+  submission: string;
+};
+
+type TranslationType = {
+  backToHome: string;
+  contactUs: string;
+  sendMessage: string;
+  formLabels: Record<FormField, string>;
+  placeholders: Record<FormField, string>;
+  buttons: {
+    sending: string;
+    sent: string;
+    send: string;
+  };
+  errors: ErrorMessages;
+  success: string;
+  characters: string;
+  contactInfo: {
+    phone: {
+      title: string;
+      value: string;
+    };
+    email: {
+      title: string;
+      value: string;
+    };
+    address: {
+      title: string;
+      value: string;
+    };
+  };
+};
+
+type Translations = {
+  en: TranslationType;
+  pt: TranslationType;
+};
+
+// Translations object
+const translations: Translations = {
+  en: {
+    backToHome: "Back to home",
+    contactUs: "Contact Us",
+    sendMessage: "Send us a Message",
+    formLabels: {
+      name: "Your Name",
+      email: "Email",
+      phone: "Phone",
+      message: "Message",
+    },
+    placeholders: {
+      name: "John Doe",
+      email: "john@example.com",
+      phone: "(+258) 82 123 5467",
+      message: "Write your message here...",
+    },
+    buttons: {
+      sending: "Sending...",
+      sent: "Message Sent!",
+      send: "Send Message",
+    },
+    errors: {
+      name: {
+        required: "Name is required",
+        pattern:
+          "Name should only contain letters and spaces (2-50 characters)",
+      },
+      email: {
+        required: "Email is required",
+        pattern: "Please enter a valid email address",
+      },
+      phone: {
+        required: "Phone number is required",
+        pattern: "Please enter a valid phone number",
+      },
+      message: {
+        required: "Message is required",
+        minLength: "Message must be at least 10 characters long",
+        maxLength: "Message cannot exceed 500 characters",
+      },
+      form: "Please correct the errors in the form.",
+      submission: "Failed to send message. Please try again.",
+    },
+    success: "Your message has been sent successfully! We'll contact you soon.",
+    characters: "characters",
+    contactInfo: {
+      phone: {
+        title: "Phone",
+        value: "(+258) 86 212 4985",
+      },
+      email: {
+        title: "Email",
+        value: "TJS@tetejuniorschool.com",
+      },
+      address: {
+        title: "Address",
+        value: "Mozambique - Tete, Chingodzi",
+      },
+    },
+  },
+  pt: {
+    backToHome: "Voltar para página inicial",
+    contactUs: "Contacte-nos",
+    sendMessage: "Envie-nos uma Mensagem",
+    formLabels: {
+      name: "Seu Nome",
+      email: "Email",
+      phone: "Telefone",
+      message: "Mensagem",
+    },
+    placeholders: {
+      name: "João Silva",
+      email: "joao@exemplo.com",
+      phone: "(+258) 82 123 5467",
+      message: "Escreva sua mensagem aqui...",
+    },
+    buttons: {
+      sending: "Enviando...",
+      sent: "Mensagem Enviada!",
+      send: "Enviar Mensagem",
+    },
+    errors: {
+      name: {
+        required: "Nome é obrigatório",
+        pattern: "Nome deve conter apenas letras e espaços (2-50 caracteres)",
+      },
+      email: {
+        required: "Email é obrigatório",
+        pattern: "Por favor, insira um endereço de email válido",
+      },
+      phone: {
+        required: "Telefone é obrigatório",
+        pattern: "Por favor, insira um número de telefone válido",
+      },
+      message: {
+        required: "Mensagem é obrigatória",
+        minLength: "A mensagem deve ter pelo menos 10 caracteres",
+        maxLength: "A mensagem não pode exceder 500 caracteres",
+      },
+      form: "Por favor, corrija os erros no formulário.",
+      submission: "Falha ao enviar mensagem. Por favor, tente novamente.",
+    },
+    success:
+      "Sua mensagem foi enviada com sucesso! Entraremos em contato em breve.",
+    characters: "caracteres",
+    contactInfo: {
+      phone: {
+        title: "Telefone",
+        value: "(+258) 86 212 4985",
+      },
+      email: {
+        title: "Email",
+        value: "TJS@tetejuniorschool.com",
+      },
+      address: {
+        title: "Endereço",
+        value: "Moçambique - Tete, Chingodzi",
+      },
+    },
+  },
+};
+
 // Validation patterns
-const PATTERNS = {
+const PATTERNS: Record<Exclude<FormField, "message">, RegExp> = {
   name: /^[a-zA-Z\s]{2,50}$/,
   email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   phone: /^\+?[\d\s-]{9,20}$/,
 };
 
-// Error messages
-const ERROR_MESSAGES = {
-  name: {
-    required: "Name is required",
-    pattern: "Name should only contain letters and spaces (2-50 characters)",
-  },
-  email: {
-    required: "Email is required",
-    pattern: "Please enter a valid email address",
-  },
-  phone: {
-    required: "Phone number is required",
-    pattern: "Please enter a valid phone number",
-  },
-  message: {
-    required: "Message is required",
-    minLength: "Message must be at least 10 characters long",
-    maxLength: "Message cannot exceed 500 characters",
-  },
-} as const;
-
-// Input validation helper
-const validateInput = (
-  name: keyof typeof ERROR_MESSAGES,
-  value: string
-): string => {
-  if (!value) return ERROR_MESSAGES[name].required;
-
-  if (name === "message") {
-    if (value.length < 10) return ERROR_MESSAGES.message.minLength;
-    if (value.length > 500) return ERROR_MESSAGES.message.maxLength;
-    return "";
-  }
-
-  if (!PATTERNS[name]?.test(value)) return ERROR_MESSAGES[name].pattern;
-  return "";
-};
-
 // Notification Component
-const Notification = ({
-  show,
-  type = "success",
-  message,
-  onClose,
-}: {
+type NotificationProps = {
   show: boolean;
   type?: "success" | "error";
   message: string;
   onClose: () => void;
+};
+
+const Notification: React.FC<NotificationProps> = ({
+  show,
+  type = "success",
+  message,
+  onClose,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -115,19 +269,9 @@ const Notification = ({
 };
 
 // Input Field Component
-const InputField = ({
-  label,
-  name,
-  type = "text",
-  value,
-  error,
-  onChange,
-  placeholder,
-  required = true,
-  ...props
-}: {
+type InputFieldProps = {
   label: string;
-  name: keyof typeof ERROR_MESSAGES;
+  name: string;
   type?: string;
   value: string;
   error?: string;
@@ -139,6 +283,18 @@ const InputField = ({
   maxLength?: number;
   rows?: number;
   minLength?: number;
+};
+
+const InputField: React.FC<InputFieldProps> = ({
+  label,
+  name,
+  type = "text",
+  value,
+  error,
+  onChange,
+  placeholder,
+  required = true,
+  ...props
 }) => {
   return (
     <div>
@@ -179,29 +335,15 @@ const InputField = ({
   );
 };
 
-// Interface for form data
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-}
-
-// Interface for form errors
-interface FormErrors {
-  name?: string;
-  email?: string;
-  phone?: string;
-  message?: string;
-}
-
 // Main Form Component
 const ContactForm = () => {
   const router = useRouter();
+  const { language, setLanguage } = useLanguage();
+  const t = translations[language];
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-
+  const [errors, setErrors] = useState<Partial<Record<FormField, string>>>({});
   const [notification, setNotification] = useState({
     show: false,
     type: "success" as "success" | "error",
@@ -216,22 +358,33 @@ const ContactForm = () => {
   });
 
   // Validate single field
-  const validateField = (name: keyof FormData, value: string) => {
-    const error = validateInput(name, value);
-    setErrors((prev) => ({
-      ...prev,
-      [name]: error,
-    }));
-    return !error;
+  const validateField = (name: FormField, value: string): string => {
+    if (!value) {
+      if (name === "message") {
+        return t.errors.message.required;
+      }
+      return t.errors[name].required;
+    }
+
+    if (name === "message") {
+      if (value.length < 10) return t.errors.message.minLength;
+      if (value.length > 500) return t.errors.message.maxLength;
+      return "";
+    }
+
+    if (PATTERNS[name] && !PATTERNS[name].test(value)) {
+      return t.errors[name].pattern;
+    }
+    return "";
   };
 
   // Validate all fields
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+  const validateForm = () => {
+    const newErrors: Partial<Record<FormField, string>> = {};
     let isValid = true;
 
-    (Object.keys(formData) as (keyof FormData)[]).forEach((key) => {
-      const error = validateInput(key, formData[key]);
+    (Object.keys(formData) as FormField[]).forEach((key) => {
+      const error = validateField(key, formData[key]);
       if (error) {
         newErrors[key] = error;
         isValid = false;
@@ -250,7 +403,11 @@ const ContactForm = () => {
       ...prev,
       [name]: value,
     }));
-    validateField(name as keyof FormData, value);
+    const error = validateField(name as FormField, value);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -260,7 +417,7 @@ const ContactForm = () => {
       setNotification({
         show: true,
         type: "error",
-        message: "Please correct the errors in the form.",
+        message: t.errors.form,
       });
       return;
     }
@@ -292,8 +449,7 @@ const ContactForm = () => {
       setNotification({
         show: true,
         type: "success",
-        message:
-          "Your message has been sent successfully! We'll contact you soon.",
+        message: t.success,
       });
 
       setTimeout(() => {
@@ -304,7 +460,7 @@ const ContactForm = () => {
       setNotification({
         show: true,
         type: "error",
-        message: "Failed to send message. Please try again.",
+        message: t.errors.submission,
       });
     } finally {
       setIsSubmitting(false);
@@ -329,15 +485,37 @@ const ContactForm = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 flex flex-col justify-center px-6 max-w-7xl mx-auto">
-          <button
-            onClick={() => router.push("/")}
-            className="flex items-center text-white mb-6 hover:text-blue-200 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to home
-          </button>
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center text-white hover:text-blue-200 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              {t.backToHome}
+            </button>
+
+            {/* Language Switcher Buttons */}
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => setLanguage("pt")}
+                variant={language === "pt" ? "default" : "outline"}
+                size="sm"
+                className="bg-white/10 text-white hover:bg-white/20"
+              >
+                PT
+              </Button>
+              <Button
+                onClick={() => setLanguage("en")}
+                variant={language === "en" ? "default" : "outline"}
+                size="sm"
+                className="bg-white/10 text-white hover:bg-bg-white/10 text-white hover:bg-white/20"
+              >
+                EN
+              </Button>
+            </div>
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Contact Us
+            {t.contactUs}
           </h1>
         </div>
       </div>
@@ -347,95 +525,84 @@ const ContactForm = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contact Information Cards */}
           <div className="lg:col-span-1 space-y-4">
-            <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center space-x-4">
-                <div className="bg-blue-100 p-4 rounded-full">
-                  <Phone className="w-6 h-6 text-blue-600" />
+            {Object.entries(t.contactInfo).map(([key, info]) => (
+              <Card
+                key={key}
+                className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-blue-100 p-4 rounded-full">
+                    {key === "phone" && (
+                      <Phone className="w-6 h-6 text-blue-600" />
+                    )}
+                    {key === "email" && (
+                      <Mail className="w-6 h-6 text-blue-600" />
+                    )}
+                    {key === "address" && (
+                      <MapPin className="w-6 h-6 text-blue-600" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-800">{info.title}</h3>
+                    <p className="text-blue-600">{info.value}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-gray-800">Phone</h3>
-                  <p className="text-blue-600">(+258) 86 212 4985</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center space-x-4">
-                <div className="bg-blue-100 p-4 rounded-full">
-                  <Mail className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-800">Email</h3>
-                  <p className="text-blue-600">TJS@tetejuniorschool.com</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6 bg-white shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center space-x-4">
-                <div className="bg-blue-100 p-4 rounded-full">
-                  <MapPin className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-800">Address</h3>
-                  <p className="text-blue-600">Mozambique - Tete, Chingodzi</p>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            ))}
           </div>
 
           {/* Contact Form */}
           <Card className="lg:col-span-2 p-8 bg-white shadow-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              Send us a Message
+              {t.sendMessage}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <InputField
-                  label="Your Name"
+                  label={t.formLabels.name}
                   name="name"
                   value={formData.name}
                   error={errors.name}
                   onChange={handleChange}
-                  placeholder="John Doe"
+                  placeholder={t.placeholders.name}
                   maxLength={50}
                 />
                 <InputField
-                  label="Email"
+                  label={t.formLabels.email}
                   name="email"
                   type="email"
                   value={formData.email}
                   error={errors.email}
                   onChange={handleChange}
-                  placeholder="john@example.com"
+                  placeholder={t.placeholders.email}
                 />
               </div>
 
               <InputField
-                label="Phone"
+                label={t.formLabels.phone}
                 name="phone"
                 type="tel"
                 value={formData.phone}
                 error={errors.phone}
                 onChange={handleChange}
-                placeholder="(+258) 82 123 5467"
+                placeholder={t.placeholders.phone}
               />
 
               <InputField
-                label="Message"
+                label={t.formLabels.message}
                 name="message"
                 type="textarea"
                 value={formData.message}
                 error={errors.message}
                 onChange={handleChange}
-                placeholder="Write your message here..."
+                placeholder={t.placeholders.message}
                 rows={4}
                 minLength={10}
                 maxLength={500}
               />
 
               <div className="text-right text-sm text-gray-500">
-                {formData.message.length}/500 characters
+                {formData.message.length}/500 {t.characters}
               </div>
 
               <button
@@ -445,10 +612,10 @@ const ContactForm = () => {
               >
                 <span>
                   {isSubmitting
-                    ? "Sending..."
+                    ? t.buttons.sending
                     : isSubmitted
-                    ? "Message Sent!"
-                    : "Send Message"}
+                    ? t.buttons.sent
+                    : t.buttons.send}
                 </span>
                 <Send className="w-4 h-4" />
               </button>

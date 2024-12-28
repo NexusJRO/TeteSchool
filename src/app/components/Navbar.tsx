@@ -1,5 +1,7 @@
 "use client";
 
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import {
   Sheet,
   SheetContent,
@@ -15,6 +17,7 @@ import React, { useState, useEffect } from "react";
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const { translations } = useLanguage();
 
   useEffect(() => {
     setIsMounted(true);
@@ -34,11 +37,11 @@ const Navbar = () => {
   }, []);
 
   const navItems = [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Gallery", href: "/galeria" },
-    { label: "Contact", href: "/contact" },
-    { label: "FAQ", href: "/faq" },
+    { label: translations.home, href: "/" },
+    { label: translations.about, href: "/about" },
+    { label: translations.gallery, href: "/galeria" },
+    { label: translations.contact, href: "/contact" },
+    { label: translations.faq, href: "/faq" },
   ];
 
   if (!isMounted) {
@@ -67,8 +70,11 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:block" aria-label="Main navigation">
-            <div className="ml-10 flex items-center space-x-8">
+          <nav
+            className="hidden md:flex items-center space-x-8"
+            aria-label="Main navigation"
+          >
+            <div className="flex items-center space-x-8">
               {navItems.map((item) => (
                 <a
                   key={item.label}
@@ -83,10 +89,16 @@ const Navbar = () => {
                 </a>
               ))}
             </div>
+
+            {/* Language Switcher */}
+            <LanguageSwitcher isScrolled={isScrolled} />
           </nav>
 
           {/* Mobile Navigation */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Language Switcher */}
+            <LanguageSwitcher isScrolled={isScrolled} />
+
             <Sheet>
               <SheetTrigger asChild>
                 <button
@@ -108,10 +120,10 @@ const Navbar = () => {
                   <span className="sr-only">Close</span>
                 </SheetClose>
                 <SheetTitle className="text-gray-900 mt-6">
-                  Navigation Menu
+                  {translations.navMenu}
                 </SheetTitle>
                 <SheetDescription className="text-gray-600">
-                  Access all sections of our site
+                  {translations.accessSections}
                 </SheetDescription>
 
                 <nav

@@ -1,11 +1,30 @@
 "use client";
 
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, Users, Clock, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
+
+const translations = {
+  en: {
+    backToHome: "Back to home",
+    eventsCalendar: "Events Calendar",
+    calendarView: "Calendar View",
+    eventsFor: "Events for",
+    noEvents: "No events scheduled for this date",
+  },
+  pt: {
+    backToHome: "Voltar para página inicial",
+    eventsCalendar: "Calendário de Eventos",
+    calendarView: "Visualização do Calendário",
+    eventsFor: "Eventos para",
+    noEvents: "Nenhum evento agendado para esta data",
+  },
+};
 
 interface Event {
   title: string;
@@ -16,29 +35,50 @@ interface Event {
 
 const EventCalendar = () => {
   const router = useRouter();
-  const events: Event[] = [
-    {
-      title: "Science Fair",
-      date: new Date("2024-10-15"),
-      description:
-        "Student science project exhibition featuring innovative experiments and research.",
-      attendees: "250+ expected",
-    },
-    {
-      title: "Parents Day",
-      date: new Date("2024-11-05"),
-      description:
-        "A special day dedicated to bringing parents and students together for engaging activities.",
-      attendees: "500+ expected",
-    },
-  ];
+  const { language, setLanguage } = useLanguage();
+  const t = translations[language];
+
+  const events: { [key: string]: Event[] } = {
+    en: [
+      {
+        title: "Science Fair",
+        date: new Date("2024-10-15"),
+        description:
+          "Student science project exhibition featuring innovative experiments and research.",
+        attendees: "250+ expected",
+      },
+      {
+        title: "Parents Day",
+        date: new Date("2024-11-05"),
+        description:
+          "A special day dedicated to bringing parents and students together for engaging activities.",
+        attendees: "500+ expected",
+      },
+    ],
+    pt: [
+      {
+        title: "Feira de Ciências",
+        date: new Date("2024-10-15"),
+        description:
+          "Exposição de projetos de ciência dos alunos, apresentando experimentos e pesquisas inovadoras.",
+        attendees: "Mais de 250 esperados",
+      },
+      {
+        title: "Dia dos Pais",
+        date: new Date("2024-11-05"),
+        description:
+          "Um dia especial dedicado a reunir pais e alunos para atividades envolventes.",
+        attendees: "Mais de 500 esperados",
+      },
+    ],
+  };
 
   const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
   const [selectedEvents, setSelectedEvents] = React.useState<Event[]>([]);
 
   const formatDate = (date: Date | null): string => {
     if (!date) return "";
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString(language === "pt" ? "pt-PT" : "en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -47,18 +87,18 @@ const EventCalendar = () => {
 
   const hasEvents = (date: Date | null): boolean => {
     if (!date) return false;
-    return events.some(
+    return events[language].some(
       (event) => event.date.toDateString() === date.toDateString()
     );
   };
 
   React.useEffect(() => {
     if (!selectedDate) return;
-    const dateEvents = events.filter(
+    const dateEvents = events[language].filter(
       (event) => event.date.toDateString() === selectedDate.toDateString()
     );
     setSelectedEvents(dateEvents);
-  }, [selectedDate]);
+  }, [selectedDate, language]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -71,15 +111,37 @@ const EventCalendar = () => {
           className="w-full h-full object-cover "
         />
         <div className="absolute inset-0 flex flex-col justify-center px-6 max-w-7xl mx-auto">
-          <button
-            onClick={() => router.push("/")}
-            className="flex items-center text-white mb-6 hover:text-blue-200 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to home
-          </button>
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center text-white hover:text-blue-200 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              {t.backToHome}
+            </button>
+
+            {/* Language Switcher Buttons */}
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => setLanguage("pt")}
+                variant={language === "pt" ? "default" : "outline"}
+                size="sm"
+                className="bg-white/10 text-white hover:bg-white/20"
+              >
+                PT
+              </Button>
+              <Button
+                onClick={() => setLanguage("en")}
+                variant={language === "en" ? "default" : "outline"}
+                size="sm"
+                className="bg-white/10 text-white hover:bg-white/20"
+              >
+                EN
+              </Button>
+            </div>
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Events Calendar
+            {t.eventsCalendar}
           </h1>
         </div>
       </div>
@@ -91,7 +153,7 @@ const EventCalendar = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarDays className="w-5 h-5 text-blue-600" />
-                Calendar View
+                {t.calendarView}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -118,7 +180,7 @@ const EventCalendar = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-blue-600" />
-                Events for {formatDate(selectedDate)}
+                {t.eventsFor} {formatDate(selectedDate)}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -134,10 +196,13 @@ const EventCalendar = () => {
                           variant="secondary"
                           className="bg-blue-100 text-blue-800"
                         >
-                          {event.date.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {event.date.toLocaleTimeString(
+                            language === "pt" ? "pt-PT" : "en-US",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
                         </Badge>
                       </div>
                       <p className="text-gray-600 mb-2">{event.description}</p>
@@ -150,7 +215,7 @@ const EventCalendar = () => {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  No events scheduled for this date
+                  {t.noEvents}
                 </div>
               )}
             </CardContent>

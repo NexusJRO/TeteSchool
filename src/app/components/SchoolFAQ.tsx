@@ -1,47 +1,101 @@
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, Search } from "lucide-react";
 import React, { useState, useMemo } from "react";
 
-const FAQS = [
-  {
-    question: "What ages do you accept?",
-    answer:
-      "We welcome children from 3 to 6 years old, providing a nurturing early learning environment tailored to their developmental stages.",
-    category: "Admissions",
+const translations = {
+  en: {
+    searchPlaceholder: "Search questions...",
+    noQuestionsFound:
+      "No questions found matching your search. Try different keywords.",
+    faqs: [
+      {
+        question: "What ages do you accept?",
+        answer:
+          "We welcome children from 3 to 6 years old, providing a nurturing early learning environment tailored to their developmental stages.",
+        category: "Admissions",
+      },
+      {
+        question: "What are your school hours?",
+        answer:
+          "Our school operates from 8:00 AM to 3:30 PM, with optional early drop-off from 7:00 AM and after-school programs until 6:00 PM to accommodate working parents.",
+        category: "Schedule",
+      },
+      {
+        question: "Do you provide meals?",
+        answer:
+          "Yes! We offer nutritious, balanced meals prepared fresh daily by our in-house chef. All meals follow dietary guidelines and we can accommodate special dietary requirements and allergies.",
+        category: "Daily Care",
+      },
+      {
+        question: "How do you ensure child safety?",
+        answer:
+          "Child safety is our top priority. We maintain strict security protocols including biometric access control, CCTV monitoring, background-checked staff, secured premises, and constant supervision. All staff are trained in first aid and emergency procedures.",
+        category: "Safety",
+      },
+      {
+        question: "What educational approach do you use?",
+        answer:
+          "We blend play-based learning with structured activities, focusing on holistic development through creativity, exploration, and fun. Our curriculum incorporates elements of Montessori, Reggio Emilia, and traditional teaching methods.",
+        category: "Education",
+      },
+      {
+        question: "How can parents stay involved?",
+        answer:
+          "We encourage parent participation through our dedicated parent portal app, regular updates, monthly parent-teacher meetings, volunteering opportunities, and interactive school events. Parents can also join our Parent Advisory Committee.",
+        category: "Parent Engagement",
+      },
+    ],
   },
-  {
-    question: "What are your school hours?",
-    answer:
-      "Our school operates from 8:00 AM to 3:30 PM, with optional early drop-off from 7:00 AM and after-school programs until 6:00 PM to accommodate working parents.",
-    category: "Schedule",
+  pt: {
+    searchPlaceholder: "Pesquisar perguntas...",
+    noQuestionsFound:
+      "Nenhuma pergunta encontrada para sua busca. Tente palavras-chave diferentes.",
+    faqs: [
+      {
+        question: "Quais idades vocês aceitam?",
+        answer:
+          "Recebemos crianças de 3 a 6 anos, proporcionando um ambiente de aprendizagem inicial acolhedor, adaptado aos seus estágios de desenvolvimento.",
+        category: "Admissões",
+      },
+      {
+        question: "Quais são os horários da escola?",
+        answer:
+          "Nossa escola funciona das 8:00 às 15:30, com opção de entrada antecipada a partir das 7:00 e programas após a escola até às 18:00 para acomodar pais que trabalham.",
+        category: "Horários",
+      },
+      {
+        question: "Vocês fornecem refeições?",
+        answer:
+          "Sim! Oferecemos refeições nutritivas e balanceadas, preparadas diariamente pelo nosso chef interno. Todas as refeições seguem diretrizes nutricionais e podemos acomodar requisitos dietéticos especiais e alergias.",
+        category: "Cuidados Diários",
+      },
+      {
+        question: "Como vocês garantem a segurança das crianças?",
+        answer:
+          "A segurança das crianças é nossa prioridade. Mantemos protocolos rigorosos de segurança, incluindo controle de acesso biométrico, monitoramento por CFTV, equipe com verificação de antecedentes, instalações seguras e supervisão constante. Toda a equipe é treinada em primeiros socorros e procedimentos de emergência.",
+        category: "Segurança",
+      },
+      {
+        question: "Qual abordagem educacional vocês utilizam?",
+        answer:
+          "Combinamos aprendizado baseado em brincadeiras com atividades estruturadas, focando no desenvolvimento holístico através da criatividade, exploração e diversão. Nosso currículo incorpora elementos dos métodos Montessori, Reggio Emilia e ensino tradicional.",
+        category: "Educação",
+      },
+      {
+        question: "Como os pais podem participar?",
+        answer:
+          "Incentivamos a participação dos pais através do nosso aplicativo portal dedicado, atualizações regulares, reuniões mensais entre pais e professores, oportunidades de voluntariado e eventos escolares interativos. Os pais também podem participar do nosso Comitê Consultivo de Pais.",
+        category: "Envolvimento dos Pais",
+      },
+    ],
   },
-  {
-    question: "Do you provide meals?",
-    answer:
-      "Yes! We offer nutritious, balanced meals prepared fresh daily by our in-house chef. All meals follow dietary guidelines and we can accommodate special dietary requirements and allergies.",
-    category: "Daily Care",
-  },
-  {
-    question: "How do you ensure child safety?",
-    answer:
-      "Child safety is our top priority. We maintain strict security protocols including biometric access control, CCTV monitoring, background-checked staff, secured premises, and constant supervision. All staff are trained in first aid and emergency procedures.",
-    category: "Safety",
-  },
-  {
-    question: "What educational approach do you use?",
-    answer:
-      "We blend play-based learning with structured activities, focusing on holistic development through creativity, exploration, and fun. Our curriculum incorporates elements of Montessori, Reggio Emilia, and traditional teaching methods.",
-    category: "Education",
-  },
-  {
-    question: "How can parents stay involved?",
-    answer:
-      "We encourage parent participation through our dedicated parent portal app, regular updates, monthly parent-teacher meetings, volunteering opportunities, and interactive school events. Parents can also join our Parent Advisory Committee.",
-    category: "Parent Engagement",
-  },
-] as const;
+};
 
 const SchoolFAQ = () => {
+  const { language } = useLanguage();
+  const t = translations[language];
+
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -53,7 +107,7 @@ const SchoolFAQ = () => {
 
   const filteredAndGroupedFAQs = useMemo(() => {
     const searchTerm = searchQuery.toLowerCase();
-    const filtered = FAQS.filter(
+    const filtered = t.faqs.filter(
       (faq) =>
         faq.question.toLowerCase().includes(searchTerm) ||
         faq.answer.toLowerCase().includes(searchTerm) ||
@@ -67,7 +121,7 @@ const SchoolFAQ = () => {
       acc[faq.category].push(faq);
       return acc;
     }, {});
-  }, [searchQuery]);
+  }, [searchQuery, t.faqs]);
 
   return (
     <div className="max-w-7xl mx-auto py-14 px-4">
@@ -79,7 +133,7 @@ const SchoolFAQ = () => {
           />
           <input
             type="text"
-            placeholder="Search questions..."
+            placeholder={t.searchPlaceholder}
             className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -99,7 +153,7 @@ const SchoolFAQ = () => {
                 </div>
                 <div className="flex-1 divide-y divide-gray-100">
                   {categoryFaqs.map((faq) => {
-                    const globalIndex = FAQS.findIndex(
+                    const globalIndex = t.faqs.findIndex(
                       (f) => f.question === faq.question
                     );
                     const isActive = activeIndices.includes(globalIndex);
@@ -142,9 +196,7 @@ const SchoolFAQ = () => {
 
       {Object.keys(filteredAndGroupedFAQs).length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            No questions found matching your search. Try different keywords.
-          </p>
+          <p className="text-gray-500 text-lg">{t.noQuestionsFound}</p>
         </div>
       )}
     </div>

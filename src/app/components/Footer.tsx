@@ -1,10 +1,54 @@
+import { useLanguage } from "@/app/contexts/LanguageContext";
 import { Mail, Phone, MapPin } from "lucide-react";
 import React from "react";
 
 export default function Footer() {
+  const { language } = useLanguage();
+
+  const footerTranslations = {
+    en: {
+      slogan:
+        "Educating and empowering young minds to create a brighter future.",
+      quickLinks: {
+        title: "Quick Links",
+        about: "About Us",
+        contact: "Contact",
+        gallery: "Gallery",
+        faq: "FAQ",
+      },
+      contactUs: {
+        title: "Contact Us",
+        address: "Mozambique - Tete, Bairro Chingodzi",
+        whatsappMessage:
+          "Hello! I would like to know more information about the school.",
+      },
+      copyright: "© 2024 Nexus JR. All rights reserved.",
+    },
+    pt: {
+      slogan:
+        "Educando e capacitando mentes jovens para criar um futuro mais brilhante.",
+      quickLinks: {
+        title: "Links Rápidos",
+        about: "Sobre Nós",
+        contact: "Contato",
+        gallery: "Galeria",
+        faq: "Perguntas Frequentes",
+      },
+      contactUs: {
+        title: "Contate-nos",
+        address: "Moçambique - Tete, Bairro Chingodzi",
+        whatsappMessage:
+          "Olá! Gostaria de saber mais informações sobre a escola.",
+      },
+      copyright: "© 2024 Nexus JR. Todos os direitos reservados.",
+    },
+  };
+
+  const currentTranslations = footerTranslations[language];
+
   // WhatsApp message configuration
-  const phoneNumber = "258862124985"; // Without the + symbol
-  const message = "Olá! Gostaria de saber mais informações sobre a escola."; // Pre-defined message
+  const phoneNumber = "258862124985";
+  const message = currentTranslations.contactUs.whatsappMessage;
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
     message
   )}`;
@@ -24,13 +68,15 @@ export default function Footer() {
               />
             </div>
             <p className="text-blue-200 text-sm leading-relaxed">
-              Educating and empowering young minds to create a brighter future.
+              {currentTranslations.slogan}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-6">
-            <h4 className="text-xl font-semibold text-white">Quick Links</h4>
+            <h4 className="text-xl font-semibold text-white">
+              {currentTranslations.quickLinks.title}
+            </h4>
             <ul className="space-y-4">
               <li>
                 <a
@@ -38,7 +84,7 @@ export default function Footer() {
                   className="text-blue-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 bg-blue-400 rounded-full group-hover:bg-white transition-colors"></span>
-                  About Us
+                  {currentTranslations.quickLinks.about}
                 </a>
               </li>
               <li>
@@ -47,7 +93,7 @@ export default function Footer() {
                   className="text-blue-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 bg-blue-400 rounded-full group-hover:bg-white transition-colors"></span>
-                  Contact
+                  {currentTranslations.quickLinks.contact}
                 </a>
               </li>
               <li>
@@ -56,7 +102,7 @@ export default function Footer() {
                   className="text-blue-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 bg-blue-400 rounded-full group-hover:bg-white transition-colors"></span>
-                  Gallery
+                  {currentTranslations.quickLinks.gallery}
                 </a>
               </li>
               <li>
@@ -65,7 +111,7 @@ export default function Footer() {
                   className="text-blue-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group"
                 >
                   <span className="w-1.5 h-1.5 bg-blue-400 rounded-full group-hover:bg-white transition-colors"></span>
-                  FAQ
+                  {currentTranslations.quickLinks.faq}
                 </a>
               </li>
             </ul>
@@ -73,7 +119,9 @@ export default function Footer() {
 
           {/* Contact Information */}
           <div className="space-y-6">
-            <h4 className="text-xl font-semibold text-white">Contact Us</h4>
+            <h4 className="text-xl font-semibold text-white">
+              {currentTranslations.contactUs.title}
+            </h4>
             <div className="space-y-5">
               <a
                 href="mailto:TJS@tetejuniorschool.com"
@@ -91,7 +139,7 @@ export default function Footer() {
               </a>
               <div className="flex items-center gap-3 text-blue-200">
                 <MapPin className="w-5 h-5 text-blue-400" />
-                <span>Mozambique - Tete , Bairro Chingodzi</span>
+                <span>{currentTranslations.contactUs.address}</span>
               </div>
             </div>
           </div>
@@ -146,7 +194,7 @@ export default function Footer() {
 
             {/* Copyright */}
             <p className="text-blue-200 text-sm">
-              © 2024 Nexus JR. Todos os direitos reservados.
+              {currentTranslations.copyright}
             </p>
           </div>
         </div>
